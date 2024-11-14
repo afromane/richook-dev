@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Potentiel{% endblock %}
+
+{% block body %}
+    <h1>Potentiel</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ potentiel.id }}</td>
+            </tr>
+            <tr>
+                <th>Code</th>
+                <td>{{ potentiel.code }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ potentiel.name }}</td>
+            </tr>
+            <tr>
+                <th>Value</th>
+                <td>{{ potentiel.value }}</td>
+            </tr>
+            <tr>
+                <th>Periodicity</th>
+                <td>{{ potentiel.periodicity }}</td>
+            </tr>
+            <tr>
+                <th>Affectation</th>
+                <td>{{ potentiel.affectation }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ potentiel.description }}</td>
+            </tr>
+            <tr>
+                <th>IsPrivate</th>
+                <td>{{ potentiel.isPrivate ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>IsActive</th>
+                <td>{{ potentiel.isActive ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Justificatif</th>
+                <td>{{ potentiel.justificatif ? potentiel.justificatif|join(', ') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Img</th>
+                <td>{{ potentiel.img }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_potentiel_index') }}">back to list</a>
+
+    <a href="{{ path('app_potentiel_edit', {'id': potentiel.id}) }}">edit</a>
+
+    {{ include('potentiel/_delete_form.html.twig') }}
+{% endblock %}

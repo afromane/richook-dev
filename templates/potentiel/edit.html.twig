@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Potentiel{% endblock %}
+
+{% block body %}
+    <h1>Edit Potentiel</h1>
+
+    {{ include('potentiel/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_potentiel_index') }}">back to list</a>
+
+    {{ include('potentiel/_delete_form.html.twig') }}
+{% endblock %}

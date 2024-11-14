@@ -1,0 +1,81 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Potentiel index{% endblock %}
+
+{% block body %}
+
+ <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                <h1 class="m-0">Marché des potentiels</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Potentiel sur le marché</a></li>
+                        {# <li class="breadcrumb-item active">liste </li> #}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+     <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                      {# <a href="{{ path('app_potentiel_new') }}" class="btn btn-primary"><i class="fa fa-plus"></i>  Créer un potentiel</a> #}
+                </h3>
+              </div>
+              <div class="card-body">
+               <table class="table  table-bordered table-hove">
+                    <thead>
+                        <tr>
+                            <th>N</th>
+                            <th>Img</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Value</th>
+                            <th>Periodicity</th>
+                            <th>Affectation</th>
+                            <th>Description</th>
+                            <th>actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for potentiel in potentiels %}
+                        <tr>
+                            <td></td>
+                            <td>
+                                <img src="{{asset('img/'~potentiel.img)}}" style="height:80px;width:80px;"/>
+                            </td>
+                            <td>{{ potentiel.code }}</td>
+                            <td>{{ potentiel.name }}</td>
+                            <td>{{ potentiel.value }}</td>
+                            <td>{{ potentiel.periodicity }}</td>
+                            <td>{{ potentiel.affectation }}</td>
+                            <td>{{ potentiel.description }}</td>
+                            
+                            <td>
+                                <a href="{{ path('app_chat_new', {'id': potentiel.id}) }}">Démarrer conversation</a>
+                                {# <a href="{{ path('app_potentiel_edit', {'id': potentiel.id}) }}">edit</a> #}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="12">no records found</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+      </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+   
+{% endblock %}

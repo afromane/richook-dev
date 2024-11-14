@@ -1,0 +1,74 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Categorie{% endblock %}
+
+{% block body %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                <h1 class="m-0">Catégorie</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Catégorie</a></li>
+                        <li class="breadcrumb-item active">index </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+     <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                      <a href="{{ path('app_category_new') }}" class="btn btn-primary"><i class="fa fa-plus"></i>  Nouvelle catégorie</a>
+                </h3>
+              </div>
+              <div class="card-body">
+               <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>N</th>
+                            <th>Label</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                            <tr>
+                                <td></td>
+                                <td>{{ category.label }}</td>
+                                <td>
+                                    <a href="{{ path('app_category_show', {'id': category.id}) }}">show</a>
+                                    <a href="{{ path('app_category_edit', {'id': category.id}) }}">edit</a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3">no records found</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>N</th>
+                            <th>Label</th>
+                            <th>Actions</th>
+                        </tr>
+                    </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+   
+    
+{% endblock %}

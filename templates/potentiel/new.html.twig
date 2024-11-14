@@ -1,0 +1,523 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Potentiel{% endblock %}
+{% block stylesheets %}
+     <link rel="stylesheet" href="{{asset('vendors/select2/css/select2.min.css')}}">
+
+  <!-- dropzonejs -->
+     {# <link rel="stylesheet" href="{{asset('vendors/dropzone/min/dropzone.min.css')}}"> #}
+
+{% endblock %}
+
+{% block javascripts %} 
+    <script src="{{asset('vendors/select2/js/select2.full.min.js')}}"></script>
+    <!-- dropzonejs -->
+    {# <script src="{{asset('vendors/dropzone/min/dropzone.min.js')}}"></script> #}
+    <script>
+        $(function () {
+            $('.select2').select2()
+
+        })
+    </script>
+
+    <script>
+        /*
+         const documents = [];
+
+        $(function() {
+            const isYesSelected = $('input[name="haveDocument"]:checked').val() === 'yes';
+            if (isYesSelected) {
+                $('#fileUploadZone').show();
+            } else {
+                $('#fileUploadZone').hide();
+            }
+
+            $('input[name="haveDocument"]').change(function() {
+                const isYesSelected = $('input[name="haveDocument"]:checked').val() === 'yes';
+                
+                if (isYesSelected) {
+                    $('#fileUploadZone').show();
+                } else {
+                    $('#fileUploadZone').hide();
+                }
+            });
+
+            // Fonction pour ajouter un document à la liste
+            $('#addFileButton').on('click', function() {
+                addFileFunction();
+            });
+            $('#savePotentiel').on('click', function() {
+                if (fileName && fileDescription && fileInput.files.length > 0) {
+                    addFileFunction();
+                }
+                // Créer un objet FormData pour envoyer les fichiers via AJAX
+                const formData = new FormData();
+                formData.append("type", $("#type").val());
+                formData.append("code", $("#code").val());
+                formData.append("name", $("#name").val());
+                formData.append("category", $("#category").val());
+                formData.append("value", $("#value").val());
+                formData.append("periodicity", $("#periodicity").val());
+                formData.append("affectation", $("#affectation").val());
+                formData.append("description", $("#description").val());
+
+                var imageInput = $("#imageInput")[0];
+                if (imageInput.files.length > 0) {
+                    formData.append("profile", imageInput.files[0]);
+                }
+
+                // Ajouter les documents à FormData
+                documents.forEach(function(doc, index) {
+                    formData.append('file_name[]', doc.name);
+                    formData.append('file_description[]', doc.description);
+                    formData.append('file[]', doc.file);
+                });
+
+            
+
+
+                // Requête AJAX pour envoyer les fichiers au serveur
+                $.ajax({
+                    url: {{path('app_potentiel_new')}},  // Remplacez par l'URL de votre API
+                    type: 'POST',
+                    data: formData,
+                    processData: false,  // Important pour éviter que jQuery ne traite les données
+                    contentType: false,  // Important pour envoyer des fichiers
+                    success: function(response) {
+                        console.log("Réponse du serveur:", response);
+                        // Afficher la réponse dans la console
+                        console.log(documents);  // Afficher tout le contenu du tableau dans la console
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Erreur lors de l'envoi des fichiers:", error);
+                    }
+                });
+            });
+
+            
+
+            function addFileFunction() {
+                const fileName = $('#fileName').val();
+                const fileDescription = $('#fileDescription').val();
+                const fileInput = $('#fileInput')[0];
+
+                // Vérifier si tous les champs sont remplis et si un fichier a été sélectionné
+                if (fileName && fileDescription && fileInput.files.length > 0) {
+                    // Créer un objet représentant le document à ajouter au tableau
+                    const document = {
+                        name: fileName,
+                        description: fileDescription,
+                        file: fileInput.files[0]  // Le fichier lui-même
+                    };
+
+                    // Ajouter l'objet document au tableau documents
+                    documents.push(document);
+
+                    // Réinitialiser la liste d'affichage
+                    displayFileList();
+
+                    // Vider les champs après ajout
+                    $('#fileName').val('');
+                    $('#fileDescription').val('');
+                    $('#fileInput').val('');
+                } else {
+                    alert("Veuillez remplir tous les champs et sélectionner un fichier.");
+                }
+            }
+
+            // Fonction pour afficher la liste des fichiers à partir du tableau documents
+            function displayFileList() {
+                // Vider la liste actuelle avant de la remplir à nouveau
+                $('#fileList').empty();
+
+                // Parcourir le tableau documents et afficher chaque fichier dans la liste
+                documents.forEach(function(doc, index) {
+                    const listItem = $('<li></li>').append(
+                        $('<strong></strong>').text('Nom: ' + doc.name),
+                        $('<br>'),
+                        $('<strong></strong>').text('Description: ' + doc.description),
+                        $('<br>'),
+                        $('<strong></strong>').text('Fichier: ' + doc.file.name),
+                        $('<br>'),
+                        // Ajout d'un bouton pour retirer le document
+                        $('<a type="button" class=" mt-2">Retirer</a>').on('click', function() {
+                            // Retirer le fichier du tableau et mettre à jour la liste
+                            documents.splice(index, 1);
+                            displayFileList(); // Réafficher la liste après suppression
+                        })
+                    );
+
+                    // Ajouter l'élément à la liste HTML
+                    $('#fileList').append(listItem);
+                });
+            }
+
+        });*/
+    </script>
+ <script>
+        
+        $(function() {
+            const documents = [];
+            const isYesSelected = $('input[name="haveDocument"]:checked').val() === 'yes';
+            if (isYesSelected) {
+                    $('#fileUploadZone').show();
+                } 
+            else {
+                $('#fileUploadZone').hide();
+            }
+            $('input[name="haveDocument"]').change(function() {
+                    const isYesSelected = $('input[name="haveDocument"]:checked').val() === 'yes';
+                    const fileUploadZone = $('#fileUploadZone');
+                    
+                if (isYesSelected) {
+                            $('#fileUploadZone').show();
+                        } else {
+                            $('#fileUploadZone').hide();
+                        }
+                });
+            
+            // Fonction pour ajouter un document à la liste
+            $('#addFileButton').on('click', function() {
+                 addFileFunction()
+            });
+            
+
+            $('#savePotentiel').on('click', function() {
+                if (fileName && fileDescription && fileInput.files.length > 0) {
+                    addFileFunction();
+                }
+                // Créer un objet FormData pour envoyer les fichiers via AJAX
+                const formData = new FormData();
+                formData.append("type", $("#type").val());
+                formData.append("code", $("#code").val());
+                formData.append("name", $("#name").val());
+                formData.append("category", $("#category").val());
+                formData.append("value", $("#value").val());
+                formData.append("periodicity", $("#periodicity").val());
+                formData.append("affectation", $("#affectation").val());
+                formData.append("description", $("#description").val());
+                var imageInput = $("#imageInput")[0];
+                if (imageInput.files.length > 0) {
+                    formData.append("profile", imageInput.files[0]);
+                }
+
+
+                // Ajouter les documents à FormData
+                documentName=""
+                documentDescription=""
+                documents.forEach(function(doc, index) {
+                   // formData.append('file_name[]', doc.name);
+                    //formData.append('file_description[]', doc.description);
+                    documentName= documentName+doc.name+"#"
+                    documentDescription=documentDescription+doc.description +"#"
+                    formData.append('file[]', doc.file);
+                });
+                
+                    formData.append('file_name', documentName);
+                    formData.append('file_description', documentDescription);
+            
+
+
+                $.ajax({
+                    url: "{{path('app_potentiel_new')}}", 
+                    type: 'POST',
+                    data: formData,
+                    processData: false, 
+                    contentType: false,  
+                    success: function(response) {
+                        
+                     $("#type").val('');
+                   $("#code").val('');
+                  $("#name").val('');
+                  $("#category").val('');
+                  $("#value").val('');
+                   $("#periodicity").val('');
+                   $("#affectation").val('');
+                   $("#description").val('');
+                    $("#imageInput").val('');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Erreur lors de l'envoi des fichiers:", error);
+                    }
+                });
+            });
+
+             
+
+            function addFileFunction(){
+                const fileName = $('#fileName').val();
+                const fileDescription = $('#fileDescription').val();
+                const fileInput = $('#fileInput')[0];
+
+                // Vérifier si tous les champs sont remplis et si un fichier a été sélectionné
+                if (fileName && fileDescription && fileInput.files.length > 0) {
+                     // Créer un objet représentant le document à ajouter au tableau
+                    const document = {
+                        name: fileName,
+                        description: fileDescription,
+                        file: fileInput.files[0]  // Le fichier lui-même
+                    };
+
+                    // Ajouter l'objet document au tableau documents
+                    documents.push(document);
+                     $('#fileName').val('');
+                    $('#fileDescription').val('');
+                    $('#fileInput').val('');
+                    // Réinitialiser la liste d'affichage
+                    displayFileList();
+                } else {
+                    alert("Veuillez remplir tous les champs et sélectionner un fichier.");
+                }
+            }
+            // Fonction pour afficher la liste des fichiers à partir du tableau documents
+            function displayFileList() {
+                // Vider la liste actuelle avant de la remplir à nouveau
+                $('#fileList').empty();
+
+                // Parcourir le tableau documents et afficher chaque fichier dans la liste
+                documents.forEach(function(doc, index) {
+                    const listItem = $('<li></li>').append(
+                        $('<strong></strong>').text('Nom: ' + doc.name),
+                        $('<br>'),
+                        $('<strong></strong>').text('Description: ' + doc.description),
+                        $('<br>'),
+                        $('<strong></strong>').text('Fichier: ' + doc.file.name),
+                        $('<br>'),
+                        // Ajout d'un bouton pour retirer le document
+                        $('<a type="button" class=" mt-2">Retirer</a>').on('click', function() {
+                            // Retirer le fichier du tableau et mettre à jour la liste
+                            documents.splice(index, 1);
+                            displayFileList(); // Réafficher la liste après suppression
+                        })
+                    );
+
+                    // Ajouter l'élément à la liste HTML
+                    $('#fileList').append(listItem);
+                });
+            }
+        });
+    </script>
+  
+    <script>
+        function triggerImageUpload() {
+            document.getElementById('imageInput').click();
+        }
+
+        function previewImage(event) {
+            const input = event.target;
+            const imagePreview = document.getElementById('imagePreview');
+            const changeButton = document.getElementById('changeImageButton');
+            const removeButton = document.getElementById('removeImageButton');
+            const uploadButton = document.getElementById('uploadButton');
+            
+            if (input.files && input.files[0]) {
+                // Show the image preview and control buttons
+                imagePreview.style.display = 'block';
+                changeButton.style.display = 'inline-block';
+                removeButton.style.display = 'inline-block';
+                uploadButton.style.display = 'none';
+                
+                // Set the preview image source
+                imagePreview.src = URL.createObjectURL(input.files[0]);
+                
+                // Release memory once the image is loaded
+                imagePreview.onload = function() {
+                    URL.revokeObjectURL(imagePreview.src);
+                };
+            }
+        }
+
+        function removeImage() {
+            const imagePreview = document.getElementById('imagePreview');
+            const changeButton = document.getElementById('changeImageButton');
+            const removeButton = document.getElementById('removeImageButton');
+            const imageInput = document.getElementById('imageInput');
+            const uploadButton = document.getElementById('uploadButton');
+
+
+            // Hide the preview image and buttons
+            imagePreview.style.display = 'none';
+            changeButton.style.display = 'none';
+            removeButton.style.display = 'none';
+            uploadButton.style.display = 'inline-block';
+
+            // Clear the file input value
+            imageInput.value = '';
+        }
+    </script>
+
+
+{% endblock %}
+
+{% block body %}
+
+ <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                <h1 class="m-0">Créer un potentiel</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{{path('app_potentiel_index')}}">Potentiel</a></li>
+                        <li class="breadcrumb-item active">Nouvelle </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+     <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            
+
+            <div class="card">
+                <form method="post" enctype="multipart/form-data" id="fileUploadForm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="type">Type de potentiel *</label>
+                                    <select id="type" name="type" class="form-control select2" required style="width:100%">
+                                        <option value="" selected="selected" disabled="disabled"></option>
+                                        <option value="Physique">Physique</option>
+                                        <option value="Materiel">Materiel</option>
+                                        <option value="Intellectuel">Intellectuel</option>
+                                        <option value="Investissement">Investissement</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="code">Code</label>
+                                    <input type="text" id="code" name="code" class="form-control" disabled/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="name">Nom du potentiel</label>
+                                    <input type="text" id="name" name="name" class="form-control"/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="category">Catégorie *</label>
+                                    <select id="category" name="category" required class="form-control select2" style="width: 100%;">
+                                        <option value="" selected="selected" disabled="disabled"></option>
+                                        {% for category in categories %}
+                                            <option value="{{category.id}}">{{category.label}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="value">Value du potentiel</label>
+                                <input type="text" id="value" name="value" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="periodicity">Périodicité *</label>
+                                <select id="periodicity" name="periodicity" class="form-control" required>
+                                    <option value="" selected="selected" disabled="disabled"></option>
+                                    <option value="Horaire">Horaire</option>
+                                    <option value="Journalière">Journalière</option>
+                                    <option value="Hebdomadaire">Hebdomadaire</option>
+                                    <option value="Mensuel">Mensuel</option>
+                                    <option value="Annuel">Annuel</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="affectation">Affectation *</label>
+                            <select id="affectation" name="affectation" class="form-control" required>
+                                <option value="" selected="selected" disabled="disabled"></option>
+                                <option value="Livre">Livre</option>
+                                <option value="Social">Journalière</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="description">De quoi s'agit-il?</label>
+                            <textarea id="description" class="form-control" name="description"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imageInput">Image du potentiel</label>
+                        <input type="file" id="imageInput" name="image" accept="image/*" onchange="previewImage(event)" class="form-control" style="display: none;" />
+                        
+                        <!-- Buttons to upload, change, or remove the image -->
+                        <button type="button" onclick="triggerImageUpload()" class="btn btn-primary" id="uploadButton">Charger Image</button>
+                        <img id="imagePreview" src="#" alt="Image Preview" style="display: none; max-width: 100%; height: 80px; width:80px" />
+                        <br>
+                        <button type="button" id="changeImageButton" onclick="triggerImageUpload()" style="display: none;" class="btn btn-warning mt-2">Changer</button>
+                        <button type="button" id="removeImageButton" onclick="removeImage()" style="display: none;" class="btn btn-danger mt-2">Annuler</button>
+                    </div>
+
+
+                        <div class="form-group">
+                            <label for="">Avez-vous des documents justificatifs ?</label>
+                            <div class="form-check-inline">
+                                <label class="form-check-label">
+                                    <input type="radio" class="form-check-input" name="haveDocument" value="yes" onclick="toggleFileUpload()"> Oui
+                                </label>
+                            </div>
+                            <div class="form-check-inline">
+                                <label class="form-check-label">
+                                    <input type="radio" class="form-check-input" name="haveDocument" value="no" checked onclick="toggleFileUpload()"> Non
+                                </label>
+                            </div>
+
+                            <div id="fileUploadZone">
+                                <!-- Liste des fichiers ajoutés avec nom, description et fichier -->
+                                <ul id="fileList" style="margin-top: 10px; list-style-type: none; padding: 0;"></ul>
+
+                                <div  style="margin-top: 10px;">
+                                    <!-- Champ pour saisir le nom du fichier -->
+                                    <input type="text" class="form-control" id="fileName" placeholder="Nom du document" style="margin-bottom: 10px;">
+                                    
+                                    <!-- Champ pour saisir la description -->
+                                    <textarea class="form-control" id="fileDescription" placeholder="Description du document" style="margin-bottom: 10px;"></textarea>
+                                    
+                                    <!-- Champ pour sélectionner un fichier -->
+                                    <input type="file" class="form-control" id="fileInput" onchange="addFileToList()">
+                                </div>
+                            <button type="button" class="btn btn-secondary mt-2" id="addFileButton">Ajouter un autre document</button>
+
+                            </div>
+
+
+                        </div>
+                    <button id="savePotentiel" type="button">Enregistrer</button>
+                        <a href="{{ path('app_potentiel_index') }}">back to list</a>
+                    </div>
+
+                    <div class="card-footer">
+                    {# <button type="submit" class="btn btn-primary">Enregistrer</button> #}
+                    </div>
+                </form>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+   
+    
+
+{% endblock %}

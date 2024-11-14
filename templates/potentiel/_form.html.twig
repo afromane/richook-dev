@@ -1,0 +1,22 @@
+{# {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button class="btn btn-primary">{{ button_label|default('Enregisterer') }}</button>
+{{ form_end(form) }} #}
+
+{{ form_start(form) }}
+    <div class="form-row">
+        {{ form_row(form.code, { 'label': 'Code', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.name, { 'label': 'Name', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.value, { 'label': 'Value', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.periodicity, { 'label': 'Periodicity', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.affectation, { 'label': 'Affectation', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.description, { 'label': 'Description', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.isPrivate, { 'label': 'Private', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.isActive, { 'label': 'Active', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.justificatif, { 'label': 'Justificatif', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.img, { 'label': 'Image', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.category, { 'label': 'Category', 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(form.user, { 'label': 'User', 'attr': {'class': 'form-control'} }) }}
+    </div>
+    <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+{{ form_end(form) }}
