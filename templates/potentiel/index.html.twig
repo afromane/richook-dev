@@ -64,6 +64,9 @@
                             <td>
                                 <a href="{{ path('app_potentiel_show', {'id': potentiel.id}) }}">show</a>
                                 <a href="{{ path('app_potentiel_edit', {'id': potentiel.id}) }}">edit</a>
+                                 <a href="{{ path('app_potentiel_transfer', {'id': potentiel.id}) }}">
+                                        {{ potentiel.isPrivate ? 'Ceder' : 'Privé' }}
+                                    </a>
                             </td>
                         </tr>
                     {% else %}

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -74,8 +76,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isVerified = false;
 
+    /**
+     * @var Collection<int, Echange>
+     */
+    #[ORM\OneToMany(targetEntity: Echange::class, mappedBy: 'owner')]
+    private Collection $echanges;
+
+    #[ORM\Column(length: 15)]
+    private ?string $phoneNumber = null;
+
+    /**
+     * @var Collection<int, Besoin>
+     */
+    #[ORM\OneToMany(targetEntity: Besoin::class, mappedBy: 'user')]
+    private Collection $besoins;
+
     public function __construct() {
         $this->createdAt =  new DateTimeImmutable();
+        $this->echanges = new ArrayCollection();
+        $this->besoins = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -305,6 +324,78 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Echange>
+     */
+    public function getEchanges(): Collection
+    {
+        return $this->echanges;
+    }
+
+    public function addEchange(Echange $echange): static
+    {
+        if (!$this->echanges->contains($echange)) {
+            $this->echanges->add($echange);
+            $echange->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEchange(Echange $echange): static
+    {
+        if ($this->echanges->removeElement($echange)) {
+            // set the owning side to null (unless already changed)
+            if ($echange->getOwner() === $this) {
+                $echange->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getPhoneNumber(): ?string
+    {
+        return $this->phoneNumber;
+    }
+
+    public function setPhoneNumber(string $phoneNumber): static
+    {
+        $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Besoin>
+     */
+    public function getBesoins(): Collection
+    {
+        return $this->besoins;
+    }
+
+    public function addBesoin(Besoin $besoin): static
+    {
+        if (!$this->besoins->contains($besoin)) {
+            $this->besoins->add($besoin);
+            $besoin->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBesoin(Besoin $besoin): static
+    {
+        if ($this->besoins->removeElement($besoin)) {
+            // set the owning side to null (unless already changed)
+            if ($besoin->getUser() === $this) {
+                $besoin->setUser(null);
+            }
+        }
 
         return $this;
     }

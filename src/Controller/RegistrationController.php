@@ -60,34 +60,36 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager
-    ,FileUploader $fileUploader): Response
-    {
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        Security $security,
+        EntityManagerInterface $entityManager,
+        FileUploader $fileUploader
+    ): Response {
         $user = new User();
-        // $form = $this->createForm(RegistrationFormType::class, $user);
-        // $form->handleRequest($request);
-
         if ($request->isMethod('POST')) {
             /** @var string $plainPassword */
-             $plainPassword = $request->request->get('password');
+            $plainPassword = $request->request->get('password');
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
-           /** @var UploadedFile $uploadFile */
-           $profile = $request->files->get('profile');
-           $sub = 'profiles/';
-           $filenameProfile = $sub . $fileUploader->upload($profile, $sub);
-             $user->setFirstName($request->request->get('firtName'))
+            /** @var UploadedFile $uploadFile */
+            $profile = $request->files->get('profile');
+            $sub = 'profiles/';
+            $filenameProfile = $sub . $fileUploader->upload($profile, $sub);
+            $user->setFirstName($request->request->get('firtName'))
                 ->setLastName($request->request->get('lastName'))
                 ->setTypePerson($request->request->get('typePerson'))
-                 ->setCity($request->request->get('city'))
+                ->setCity($request->request->get('city'))
                 ->setGender($request->request->get('gender'))
-                 ->setEmail($request->request->get('email'))
+                ->setEmail($request->request->get('email'))
                 ->setAddresse($request->request->get('addresse'))
+                ->setPhoneNumber($request->request->get('phoneNumber'))
                 ->setCountry($request->request->get('country'))
-                 ->setProvince($request->request->get('province'))
-                 ->setProfile($filenameProfile)
-                 ->setActive(true)
-                 ->setDevise($request->request->get('devise'));
+                ->setProvince($request->request->get('province'))
+                ->setProfile($filenameProfile)
+                ->setActive(true)
+                ->setDevise($request->request->get('devise'));
 
 
             $entityManager->persist($user);

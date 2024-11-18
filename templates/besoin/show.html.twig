@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Besoin{% endblock %}
+
+{% block body %}
+    <h1>Besoin</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ besoin.id }}</td>
+            </tr>
+            <tr>
+                <th>Label</th>
+                <td>{{ besoin.label }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ besoin.description }}</td>
+            </tr>
+            <tr>
+                <th>CreatedAt</th>
+                <td>{{ besoin.createdAt ? besoin.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>IsPrivate</th>
+                <td>{{ besoin.isPrivate ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Img</th>
+                <td>{{ besoin.img }}</td>
+            </tr>
+            <tr>
+                <th>Periode</th>
+                <td>{{ besoin.periode }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_besoin_index') }}">back to list</a>
+
+    <a href="{{ path('app_besoin_edit', {'id': besoin.id}) }}">edit</a>
+
+    {{ include('besoin/_delete_form.html.twig') }}
+{% endblock %}

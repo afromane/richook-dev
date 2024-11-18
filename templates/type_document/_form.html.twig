@@ -1,0 +1,13 @@
+{{ form_start(form) }}
+    {# {{ form_widget(form) }} #}
+    {{ form_row(form.label, {
+        label: 'Label',
+        attr :{
+            'class':'form-control'
+        }
+    }) }}
+    <br>
+    <a  class="btn btn-secondary" href="{{ path('app_type_document_index') }}">Annuler</a>
+
+    <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+{{ form_end(form) }}

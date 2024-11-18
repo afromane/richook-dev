@@ -270,7 +270,7 @@
                   <i class="nav-icon far fa-calendar-alt"></i>
                   <p>
                     Tableau de bord
-                    <span class="badge badge-info right">2</span>
+                    {# <span class="badge badge-info right">2</span> #}
                   </p>
                 </a>
               </li>
@@ -298,20 +298,43 @@
                 </ul>
               </li>
                <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon far fa-envelope"></i>
+                  <p>
+                    Mes besoin
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="{{path('app_besoin_new')}}" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Créer un besoin</p>
+                    </a>
+                  </li>
+                   <li class="nav-item">
+                    <a href="{{path('app_besoin_index')}}" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Liste des besoin</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+               <li class="nav-item">
                 <a href="{{path('app_potentiel_index_marche')}}" class="nav-link">
                   <i class="nav-icon far fa-calendar-alt"></i>
                   <p>
                     Marché des potentiels
-                    <span class="badge badge-info right">2</span>
+                    {# <span class="badge badge-info right">2</span> #}
                   </p>
                 </a>
               </li>
                <li class="nav-item">
-                <a href="{{path('app_exchange')}}" class="nav-link">
+                <a href="{{path('app_echange_index')}}" class="nav-link">
                   <i class="nav-icon far fa-calendar-alt"></i>
                   <p>
                      Mes échanges
-                    <span class="badge badge-info right">2</span>
+                    {# <span class="badge badge-info right">2</span> #}
                   </p>
                 </a>
               </li>
@@ -332,7 +355,12 @@
                       <p>Catégorie</p>
                     </a>
                   </li>
-                  
+                   <li class="nav-item">
+                    <a href="{{path('app_type_document_index')}}" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Document justificatif</p>
+                    </a>
+                  </li>
                 </ul>
               </li>
             </ul>

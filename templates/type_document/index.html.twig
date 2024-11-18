@@ -1,0 +1,67 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Document justificatif{% endblock %}
+{% block body %}
+
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                <h1 class="m-0">Catégorie</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Catégorie</a></li>
+                        <li class="breadcrumb-item active">index </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <a href="{{ path('app_type_document_new') }}" class="btn btn-primary"><i class="fa fa-plus"></i>  Nouvelle type document</a>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>N</th>
+                                        <th>Label</th>
+                                        <th>actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for type_document in type_documents %}
+                                    <tr>
+                                        <td></td>
+                                        <td>{{ type_document.label }}</td>
+                                        <td>
+                                            {# <a href="{{ path('app_type_document_show', {'id': type_document.id}) }}">show</a> #}
+                                            {{ include('type_document/_delete_form.html.twig') }}
+                                            <a href="{{ path('app_type_document_edit', {'id': type_document.id}) }}">edit</a>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3">no records found</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

@@ -55,9 +55,6 @@ final class PotentielController extends AbstractController
         FileUploader $fileUploader
     ): Response {
         $potentiel = new Potentiel();
-        // $form = $this->createForm(PotentielType::class, $potentiel);
-        // $form->handleRequest($request);
-        // dd($potentiel);
         if ($request->isMethod('POST')) {
             $type = $request->request->get('type');
             $code = $request->request->get('code');
@@ -132,6 +129,15 @@ final class PotentielController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/transfer', name: 'app_potentiel_transfer', methods: ['GET', 'POST'])]
+    public function transfer(Request $request, Potentiel $potentiel, EntityManagerInterface $entityManager): Response
+    {
+
+        $potentiel->setPrivate(!$potentiel->isPrivate());
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_potentiel_index', [], Response::HTTP_SEE_OTHER);
+    }
     #[Route('/{id}/edit', name: 'app_potentiel_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Potentiel $potentiel, EntityManagerInterface $entityManager): Response
     {
