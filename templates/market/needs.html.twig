@@ -1,0 +1,498 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Marché des besoins{% endblock %}
+{% block stylesheets %}
+{# <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> #}
+    {# <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> #}
+    <style>
+        .chat-window {
+            width: 300px;
+            position: fixed;
+            /*bottom: 0;*/
+            bottom: 100px;
+            right: 20px;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: white;
+            margin-left: 10px;
+            z-index: 1000;
+        }
+        
+        .chat-header {
+            padding: 10px;
+            background: #fff;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+        }
+        
+        .chat-body {
+            height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        
+        .chat-input {
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .chat-input-field {
+            border-radius: 20px;
+            background: #f0f2f5;
+        }
+        
+        .chat-container {
+            display: flex;
+            position: fixed;
+            bottom: 0;
+            right: 20px;
+            gap: 10px;
+            flex-wrap: wrap-reverse;
+            max-width: 100vw;
+            padding: 10px;
+        }
+        
+        .minimized {
+            height: 40px;
+            overflow: hidden;
+        }
+        
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+        }
+        
+        .new-chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1001;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+
+        .message-sent {
+            margin-left: auto;
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 15px 15px 5px 15px;
+            padding: 8px 12px;
+        }
+
+        .message-received {
+            margin-right: auto;
+            background-color: #e9ecef;
+            color: black;
+            border-radius: 15px 15px 15px 5px;
+            padding: 8px 12px;
+        }
+
+        .typing-indicator {
+            padding: 5px;
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .chat-window {
+                width: calc(100% - 40px);
+                right: 20px;
+                margin-bottom: 60px;
+            }
+
+            .chat-container {
+                right: 0;
+                left: 0;
+                padding: 0;
+            }
+
+            .minimized {
+                width: auto;
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .chat-window {
+                width: 100%;
+                right: 0;
+                left: 0;
+                margin: 0;
+            }
+
+            .new-chat-btn {
+                bottom: 70px;
+            }
+        }
+
+        /* Animation pour l'indicateur de frappe */
+        .typing-dots::after {
+            content: '.';
+            animation: typing 1s infinite;
+        }
+
+        @keyframes typing {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+
+    {# <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> #}
+    {# <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> #}
+    <script>
+        $(document).ready(function() {
+            let chatCount = 0;
+            const users = ['Alice', 'Bob', 'Charlie', 'David', 'Eve']; // Utilisateurs simulés
+            let typingTimers = {};
+
+            // Fonction pour simuler une réponse
+            function simulateResponse(chatId, originalMessage) {
+                const chatBody = $(`#${chatId}`).find('.chat-body');
+                const typingIndicator = $(`#${chatId}`).find('.typing-indicator');
+                
+                // Afficher l'indicateur de frappe
+                typingIndicator.show();
+                
+                // Simuler un délai de réponse aléatoire
+                setTimeout(() => {
+                    typingIndicator.hide();
+                    
+                    // Générer une réponse basée sur le message original
+                    let response;
+                    if (originalMessage.toLowerCase().includes('bonjour')) {
+                        response = "Bonjour ! Comment puis-je vous aider ?";
+                    } else if (originalMessage.toLowerCase().includes('comment')) {
+                        response = "Je vais bien, merci de demander !";
+                    } else {
+                        const responses = [
+                            "Intéressant, dites-m'en plus !",
+                            "Je comprends ce que vous voulez dire.",
+                            "C'est une bonne observation.",
+                            "Je suis d'accord avec vous."
+                        ];
+                        response = responses[Math.floor(Math.random() * responses.length)];
+                    }
+                    
+                    // Ajouter la réponse au chat
+                    addMessage(chatId, response, 'received');
+                    
+                    // Faire défiler jusqu'en bas
+                    chatBody.scrollTop(chatBody[0].scrollHeight);
+                }, Math.random() * 2000 + 1000); // Délai aléatoire entre 1 et 3 secondes
+            }
+
+            // Fonction pour ajouter un message
+            function addMessage(chatId, messages, type) {
+                const chatBody = $(`#${chatId}`).find('.chat-body');
+                const echangeId = $(`#${chatId} .exchangeId `).val();
+
+                if (messages !== '') {
+                    $.ajax({
+                        url: '{{path("app_market_needs_message_send")}}',
+                        method: 'POST',
+                        data: { message: messages, echange_id: echangeId },
+                        dataType: 'json',
+                        success: function (response) {
+                            // Rafraîchir les messages après envoi
+                            $.ajax({
+                                url: '{{path("app_market_needs_message_show")}}',
+                                type: 'POST',
+                                data: { id: echangeId },
+                                dataType: 'json',
+                                success: function (response1) {
+                                    displayMessages(response1, chatId);
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error('Erreur lors du rafraîchissement:', error);
+                                }
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            alert('Erreur lors de l\'enregistrement du message. Veuillez réessayer.');
+                        }
+                    });
+                } else {
+                    alert('Veuillez entrer un message avant de l\'envoyer.');
+                }
+                
+                // Ajouter les messages
+               /* messages.forEach(message => {
+                    
+                       chatBody.append(`
+                                <div class="message ${message.sender === message.currentUser  ? 'message-sent' : 'message-received'}">
+                                        ${message.contenu}
+                                    </div>
+                            `);
+                });*/
+                
+                chatBody.scrollTop(chatBody[0].scrollHeight);
+            }
+            // Fonction pour afficher les messages
+            function displayMessages(response,chatId){
+                const userName = users[Math.floor(Math.random() * users.length)];
+                const profile = '{{asset('+${response.user.profile}+')}}';
+                 
+                
+                const chatHtml = `
+                    <div class="chat-window" id="${chatId}">
+                        <div class="chat-header border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class=" user-avatar me-2" style="background-image:url(${profile})">
+                                    </div>
+                                    <span class="fw-bold">${response.user.name}</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm minimize-btn" data-chat-id="${chatId}">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button class="btn btn-sm close-btn" data-chat-id="${chatId}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-body">
+                            <div class="text-center text-muted small mb-3">
+                                Début de votre conversation avec ${response.user.name}
+                            </div>
+                            <div class="typing-indicator text-muted small">
+                                <span>${response.user.name} est en train d'écrire</span>
+                                <span class="typing-dots"></span>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1 me-2">
+                                    <div class="input-group chat-input-field">
+                                        <input type="hidden" value="${response.echangeId}" class="exchangeId" />
+                                        <input type="text" class="form-control border-0 bg-transparent" 
+                                            placeholder="Aa" data-chat-id="${chatId}">
+                                        <span class="input-group-text border-0 bg-transparent">
+                                            <i class="far fa-smile"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-link text-primary p-0 send-like" data-chat-id="${chatId}">
+                                        <i class="fas fa-thumbs-up"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                $('#chatContainer').append(chatHtml);
+                const chatBody = $(`#${chatId}`).find('.chat-body');
+                $(chatBody).val('');
+                 response.messages.forEach(message => {
+                    
+                        const messageHtml = `
+                        <div class="message ${message.sender === message.currentUser  ? 'message-sent' : 'message-received'}">
+                            ${message.contenu}
+                        </div>`;
+                    chatBody.append(messageHtml);
+                });
+                repositionChats();
+            }
+            // Fonction pour créer une nouvelle fenêtre de chat
+            function createNewChat() {
+                chatCount++;
+                const chatId = `chat-${chatCount}`;
+                const needId = $(this).attr('id').trim()
+                $.ajax({
+                    url: '{{path("app_market_needs_start_exchange")}}',
+                    type: 'POST',
+                    data: { needId: needId },
+                    dataType: 'json',
+                    success: function (response) {
+                        
+                        displayMessages(response,chatId)
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Erreur:', error);
+                    }
+                });
+                /* const chatHtml = `
+                    <div class="chat-window" id="${chatId}">
+                        <div class="chat-header border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-2"></div>
+                                    <span class="fw-bold">${userName}</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm minimize-btn" data-chat-id="${chatId}">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button class="btn btn-sm close-btn" data-chat-id="${chatId}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-body">
+                            <div class="text-center text-muted small mb-3">
+                                Début de votre conversation avec ${userName}
+                            </div>
+                            <div class="typing-indicator text-muted small">
+                                <span>${userName} est en train d'écrire</span>
+                                <span class="typing-dots"></span>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1 me-2">
+                                    <div class="input-group chat-input-field">
+                                        <input type="text" class="form-control border-0 bg-transparent" 
+                                            placeholder="Aa" data-chat-id="${chatId}">
+                                        <span class="input-group-text border-0 bg-transparent">
+                                            <i class="far fa-smile"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-link text-primary p-0 send-like" data-chat-id="${chatId}">
+                                        <i class="fas fa-thumbs-up"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 `;
+                
+                    $('#chatContainer').append(chatHtml);
+                */
+                repositionChats();
+            }
+            
+            // Fonction pour repositionner les chats
+            function repositionChats() {
+                if ($(window).width() > 768) {
+                    $('.chat-window').each(function(index) {
+                        $(this).css('right', (320 * index + 20) + 'px');
+                    });
+                } else {
+                    $('.chat-window').css('right', '');
+                }
+            }
+
+            // Gestionnaire pour le bouton nouvelle conversation
+            $('.newChatBtn').click(createNewChat);
+            
+            // Gestionnaire pour minimiser/maximiser
+            $(document).on('click', '.minimize-btn', function() {
+                const chatId = $(this).data('chat-id');
+                $(`#${chatId}`).toggleClass('minimized');
+            });
+            
+            // Gestionnaire pour fermer
+            $(document).on('click', '.close-btn', function() {
+                const chatId = $(this).data('chat-id');
+                $(`#${chatId}`).remove();
+                repositionChats();
+            });
+            
+            // Gestionnaire pour l'envoi de messages
+            $(document).on('keypress', '.chat-input-field input', function(e) {
+                if (e.which === 13 && $(this).val().trim() !== '') {
+                    const chatId = $(this).data('chat-id');
+                    const message = $(this).val();
+                    
+                    // Ajouter le message envoyé
+                    addMessage(chatId, message, 'sent');
+                    
+                    // Vider l'input
+                    $(this).val('');
+                    
+                    // Simuler une réponse
+                   // simulateResponse(chatId, message);
+                }
+            });
+
+            // Gestionnaire pour le bouton "like"
+            $(document).on('click', '.send-like', function() {
+                const chatId = $(this).data('chat-id');
+                addMessage(chatId, '<i class="fas fa-thumbs-up fa-lg"></i>', 'sent');
+                simulateResponse(chatId, 'thumbs_up');
+            });
+
+            // Gestionnaire de redimensionnement de la fenêtre
+            $(window).resize(repositionChats);
+        });
+    </script>
+
+{% endblock %}
+
+{% block body %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                <h1 class="m-0">Marché des besoins</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Marché  </a></li>
+                        <li class="breadcrumb-item active">besoins </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+
+             {% for need in needs %} 
+                <div class='col-md-3'>
+                    <div class="card" >
+                        <img class="card-img-top" src="{{asset('img/'~need.img)}}" alt="Card image" style="height:150px;">
+                        <div class="card-body">
+                            <h4 class="card-title" style="font-weight:bold;">{{need.label}}</h4>
+                            <p class="card-text">{{need.description |slice(0, 30)}} ...</p>
+                            <a href="#" class="">infos</a>
+                            <a  class='newChatBtn' href="#"  id="{{need.id}}">Demarrer discussion</a>
+                        </div>
+                    </div>
+                
+                </div
+             {% else %}
+                <p>
+                    <td colspan="12">no records found</td>
+                </p>
+            {% endfor %}
+            <div class="col-12">
+
+            </div>
+        </div>
+      </div>
+    </section> 
+    <!-- Fenêtres pour le chat -->
+   <div class="chat-container" id="chatContainer">
+    <!-- Les fenêtres de chat seront ajoutées ici dynamiquement -->
+</div>
+{% endblock %}

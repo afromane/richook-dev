@@ -9,7 +9,7 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {# <link rel="preconnect" href="https://fonts.gstatic.com"> #}
         <link rel="stylesheet" href="{{asset('vendors/fontawesome-free/css/all.min.css')}}">
-        <link rel="stylesheet" href="{{asset('vendors/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')}}">
+        {# <link rel="stylesheet" href="{{asset('vendors/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')}}"> #}
         <link rel="stylesheet" href="{{asset('vendors/icheck-bootstrap/icheck-bootstrap.min.css')}}">
         <link rel="stylesheet" href="{{asset('admin/css/adminlte.min.css')}}">
         <link rel="stylesheet" href="{{asset('vendors/overlayScrollbars/css/OverlayScrollbars.min.css')}}">
@@ -216,7 +216,7 @@
       <!-- Main Sidebar Container -->
       <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <!-- Brand Logo -->
-        <a href="index3.html" class="brand-link">
+        <a href="" class="brand-link">
           <img
             src=""
             alt=""
@@ -297,7 +297,7 @@
                   </li>
                 </ul>
               </li>
-               <li class="nav-item">
+              <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon far fa-envelope"></i>
                   <p>
@@ -316,6 +316,31 @@
                     <a href="{{path('app_besoin_index')}}" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Liste des besoin</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon far fa-envelope"></i>
+                  <p>
+                    Marché
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="{{path('app_market_needs')}}" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Marché des besoins</p>
+                    </a>
+                  </li>
+                   <li class="nav-item">
+                    <a href="{{path('app_market_needs')}}" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Marché des potentiel</p>
+
                     </a>
                   </li>
                 </ul>

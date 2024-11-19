@@ -15,7 +15,7 @@ class Message
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'messages')]
+    #[ORM\ManyToOne(inversedBy: 'messages',cascade:array('persist'))]
     private ?Echange $echange = null;
 
     #[ORM\ManyToOne]

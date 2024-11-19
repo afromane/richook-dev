@@ -480,7 +480,7 @@
                 $.ajax({
                     url: '{{path("app_echange_message_show")}}',
                     type: 'POST',
-                    data: { id: echangeId },
+                    data: { need_id: echangeId },
                     dataType: 'json',
                     success: function (response) {
                         displayMessages(response, echangeId);
