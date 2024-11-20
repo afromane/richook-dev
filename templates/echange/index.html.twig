@@ -438,9 +438,9 @@
             const $chatItem = $('.chat-item')
             const profileOwner = $('#profileOwner');
             const nameOwner = $('#nameOwner');
-            const potentielImage = $('#potentielImage');
-            const potentielName = $('#potentielName');
-            const potentielDescription = $('#potentielDescription');
+            const infosImage = $('#infosImage');
+            const infosName = $('#infosName');
+            const infosDescription = $('#infosDescription');
            
 
             // Initialisation : cacher la section des messages
@@ -458,9 +458,9 @@
                 $chatContent.empty();
                 profileOwner.attr('src', response.owner.profile);
                 nameOwner.text(response.owner.name);
-                potentielImage.attr('src', response.potentiel.image);
-                potentielName.text(response.potentiel.name);
-                potentielDescription.text(response.potentiel.description);
+                infosImage.attr('src', response.infos.image);
+                infosName.text(response.infos.name);
+                infosDescription.text(response.infos.description);
 
                 // Ajouter les messages
                 response.messages.forEach(message => {
@@ -480,9 +480,11 @@
                 $.ajax({
                     url: '{{path("app_echange_message_show")}}',
                     type: 'POST',
-                    data: { need_id: echangeId },
+                    data: { echangeId: echangeId },
                     dataType: 'json',
                     success: function (response) {
+
+                      console.log(response.messages)
                         displayMessages(response, echangeId);
                     },
                     error: function (xhr, status, error) {
@@ -512,7 +514,7 @@
                             $.ajax({
                                 url: '{{path("app_echange_message_show")}}',
                                 type: 'POST',
-                                data: { id: echangeId },
+                                data: { echangeId: echangeId },
                                 dataType: 'json',
                                 success: function (response) {
                                     displayMessages(response, echangeId);
@@ -568,44 +570,80 @@
                     </button>
                     </div>
                 </div>
-        
                 <div class="chat-filters">
-                    <ul class="nav nav-pills nav-fill">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#">Potentiel</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Besoin</a>
-                        </li>
-                    </ul>
+                  <ul class="nav nav-pills nav-fill" id="myTab" role="tablist">
+                      <li class="nav-item" role="presentation">
+                          <button class="nav-link active" id="potential-tab" data-bs-toggle="tab" data-bs-target="#potential" type="button" role="tab" 
+                          aria-controls="potential" aria-selected="true">Potential</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                          <button class="nav-link" id="need-tab" data-bs-toggle="tab" data-bs-target="#need" type="button" role="tab"
+                           aria-controls="need" aria-selected="false">Besoin</button>
+                      </li>
+                  </ul>
                 </div>
-        
-                <div class="chat-list custom-scrollbar">
-                    <!-- Liste des Echanges -->
-                    {% for echange in echangesPotentiels %}
-                        <div class="chat-item" id="{{echange.id}}">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="{{asset('img/'~echange.owner.profile)}}" alt="Avatar" class="avatar" />
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center"   >
-                                        <h6 class="mb-1">{{echange.owner.firstName}}</h6>
-                                        {# <small class="text-muted">3h</small> #}
-                                    </div>
-                                    {# <p class="mb-0 text-muted" id="lastMessage">Lorem ipsum is simply...</p> #}
-                                    <p class="mb-0 text-muted" id="lastMessage">
-                                        {% if echange.messages|length > 0 %}
-                                                {{ echange.messages[echange.messages|length - 1].contenu |slice(0, 20)  }} ...
-                                            {% else %}
-                                                Aucun message disponible.
-                                            {% endif %}
+                  <!-- Tab Content -->
+                  <div class="chat-list custom-scrollbar">
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="potential" role="tabpanel" aria-labelledby="potential-tab">
+                            {# <p>Welcome to the Home tab!</p> #}
+                             {% for potential in exchangePotential %}
+                                  <div class="chat-item" id="{{potential.id}}">
+                                      <div class="d-flex align-items-center gap-2">
+                                          <img src="{{asset('img/'~potential.owner.profile)}}" alt="Avatar" class="avatar" />
+                                          <div class="flex-grow-1">
+                                              <div class="d-flex justify-content-between align-items-center"   >
+                                                  <h6 class="mb-1">{{potential.owner.firstName}}</h6>
+                                              </div>
+                                              <p class="mb-0 text-muted" id="lastMessage">
+                                                  {% if potential.messages|length > 0 %}
+                                                          {{ potential.messages[potential.messages|length - 1].contenu |slice(0, 20)  }} ...
+                                                      {% else %}
+                                                          Aucun message disponible.
+                                                      {% endif %}
 
-                                    </p>
-                                </div>
-                                {# <span class="notification-badge">2</span> #}
-                            </div>
+                                              </p>
+                                          </div>
+                                          <span class="notification-badge">2</span> 
+                                      </div>
+                                  </div>
+                                {% else %}
+                              <p>
+                                Pas de message
+                              </p>
+                              {% endfor %}
                         </div>
-                    {% endfor %}
+                        <div class="tab-pane fade" id="need" role="tabpanel" aria-labelledby="need-tab">
+                            {# <p>Here's your need information.</p> #}
+                            {% for need in exchangeNeed %}
+                                  <div class="chat-item" id="{{need.id}}">
+                                      <div class="d-flex align-items-center gap-2">
+                                          <img src="{{asset('img/'~need.owner.profile)}}" alt="Avatar" class="avatar" />
+                                          <div class="flex-grow-1">
+                                              <div class="d-flex justify-content-between align-items-center"   >
+                                                  <h6 class="mb-1">{{need.owner.firstName}}</h6>
+                                              </div>
+                                              <p class="mb-0 text-muted" id="lastMessage">
+                                                  {% if need.messages|length > 0 %}
+                                                          {{ need.messages[need.messages|length - 1].contenu |slice(0, 20)  }} ...
+                                                      {% else %}
+                                                          Aucun message disponible.
+                                                      {% endif %}
+
+                                              </p>
+                                          </div>
+                                          <span class="notification-badge">2</span> 
+                                      </div>
+                                  </div>
+                                 {% else %}
+                              <p>
+                                Pas de message
+                              </p>
+                              {% endfor %}
+                        </div>
+                    </div>
                 </div>
+              
             </div>
                 <!-- Zone principale de chat -->
                 <div class="col-12 col-lg-6 chat-main">
@@ -650,8 +688,8 @@
                 <!-- Sidebar droite -->
                 <div class="col-lg-3 profile-sidebar">
                     <div class="text-center mb-4">
-                        <img  id="potentielImage"  class="avatar avatar-lg mb-3"  />
-                        <h5 class="mb-2" id="potentielName"></h5>
+                        <img  id="infosImage"  class="avatar avatar-lg mb-3"  />
+                        <h5 class="mb-2" id="infosName"></h5>
                         {# <button class="btn btn-outline-primary btn-sm">
                         See full profile
                         </button> #}
@@ -676,7 +714,7 @@
             
                     <div>
                         <h6 class="mb-3">Description</h6>
-                        <textarea class="form-control"   rows="4"      id="potentielDescription"   disabled  ></textarea>
+                        <textarea class="form-control"   rows="4"      id="infosDescription"   disabled  ></textarea>
                     </div>
                 </div>
         </div>

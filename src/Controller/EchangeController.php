@@ -25,14 +25,22 @@ final class EchangeController extends AbstractController
         //recupere toutes les echanges de l'utilisateur courant
         $echanges = $echangeRepository->findAll();
         $currentUser =  $userRepository->findOneBy(array('email' => $this->getUser()->getUserIdentifier()));
-        $echangesPotentiels = [];
+        $exchangePotential = [];
+        $exchangeNeed = [];
+
         foreach ($echanges as $value) {
-            if ($value->getOwner()->getId() == $currentUser->getId() || $value->getPotentiel()->getUser()->getId() == $currentUser->getId())
-                $echangesPotentiels[] = $value;
+            // retrieve all potential exchange
+            if ($value->getBesoin() == null  && !$value->getPotentiel()) {
+                if ($value->getOwner()->getId() == $currentUser->getId() || $value->getPotentiel()->getUser()->getId() == $currentUser->getId())
+                    $exchangePotential[] = $value;
+            } else {
+                if ($value->getOwner()->getId() == $currentUser->getId() || $value->getBesoin()->getUser()->getId() == $currentUser->getId())
+                    $exchangeNeed[] = $value;
+            }
         }
-        //   dd($result);
         return $this->render('echange/index.html.twig', [
-            'echangesPotentiels' => $echangesPotentiels,
+            'exchangePotential' => $exchangePotential,
+            'exchangeNeed' => $exchangeNeed,
         ]);
     }
 
@@ -57,16 +65,11 @@ final class EchangeController extends AbstractController
     {
         $currentUser =  $userRepository->findOneBy(array('email' => $this->getUser()->getUserIdentifier()));
         $echange = new Echange();
-        $echange = $echangeRepository->find($request->request->get('id'));
+        $echange = $echangeRepository->find($request->request->get('echangeId'));
 
-        $messages = $messageRepository->findBy(
-            ['echange' => $echange->getId()],
-            ['id' => 'ASC'],
-            20
-
-        );
+        $messages = $messageRepository->findBy(['echange' => $echange->getId()], ['id' => 'ASC'], 20);
         $result = [];
-        $lastMessage="";
+        $lastMessage = "";
         foreach ($messages as $value) {
             $lastMessage = $value->getContenu();
             $result[] = array(
@@ -79,19 +82,57 @@ final class EchangeController extends AbstractController
 
             );
         }
-        $data = array(
-            'messages' => $result,
-            'lastMessage'=> $lastMessage,
-            'potentiel' => array(
+        // Verify if exchange it for Potential or need
+        $infos = [];
+        $isPotential = true;
+        if ($echange->getPotentiel() == null && $echange->getBesoin()) {
+
+            $isPotential = false;
+            $infos = array(
+                'name' => $echange->getBesoin()->getLabel(),
+                'description' => $echange->getBesoin()->getDescription(),
+                'image' => 'img/' . $echange->getBesoin()->getImg(),
+                'user_id' => $echange->getBesoin()->getUser()->getId()
+            );
+        } else {
+            array(
                 'name' => $echange->getPotentiel()->getName(),
                 'description' => $echange->getPotentiel()->getDescription(),
                 'image' => 'img/' . $echange->getPotentiel()->getImg(),
                 'user_id' => $echange->getPotentiel()->getUser()->getId()
-            ),
-            'owner' => array(
-                'name' => $echange->getOwner()->getFirstName() . ' ' . $echange->getOwner()->getLastName(),
-                'profile' => 'img/' . $echange->getOwner()->getProfile()
-            )
+            );
+        }
+        $owner =[];
+
+        if( $currentUser->getId() == $echange->getOwner()->getId())
+        {
+            if($echange->getPotentiel() == null && $echange->getBesoin())
+            {
+                 $owner = array(
+                    'name' =>   $echange->getBesoin()->getUser()->getFirstName() . ' ' . $echange->getBesoin()->getUser()->getLastName(),
+                    'profile' => 'img/' . $echange->getBesoin()->getUser()->getProfile()
+                 );
+            }
+            else{
+                $owner = array(
+                    'name' =>   $echange->getPotentiel()->getUser()->getFirstName() . ' ' . $echange->getPotentiel()->getUser()->getLastName(),
+                    'profile' => 'img/' . $echange->getPotentiel()->getUser()->getProfile()
+                 );
+            }
+
+        }
+        else{
+                 $owner = array(
+                    'name' =>   $echange->getOwner()->getFirstName() . ' ' . $echange->getOwner()->getLastName(),
+                    'profile' => 'img/' . $echange->getOwner()->getProfile()
+                 );
+        }
+        $data = array(
+            'messages' => $result,
+            'lastMessage' => $lastMessage,
+            'isPotential' => $isPotential,
+            'infos' => $infos,
+            'owner' => $owner
         );
 
         return new Response(
@@ -112,9 +153,9 @@ final class EchangeController extends AbstractController
 
         if ($echange->getOwner()->getId() == $currentUser->getId()) {
             $sender = $this->getUser();
-            $recipient = $echange->getPotentiel()->getUser();
+            $recipient = $echange->getPotentiel() != null ?$echange->getPotentiel()->getUser() : $echange->getBesoin()->getUser();
         } else {
-            $sender = $echange->getPotentiel()->getUser();
+            $sender = $echange->getPotentiel() != null ?$echange->getPotentiel()->getUser() : $echange->getBesoin()->getUser();
             $recipient =  $this->getUser();
         }
         $message->setEchange($echange)
@@ -133,7 +174,7 @@ final class EchangeController extends AbstractController
     }
 
 
-    
+
     #[Route('/{id}', name: 'app_echange_show', methods: ['GET'])]
     public function show(Echange $echange): Response
     {

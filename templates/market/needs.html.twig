@@ -250,7 +250,6 @@
             }
             // Fonction pour afficher les messages
             function displayMessages(response,chatId){
-                const userName = users[Math.floor(Math.random() * users.length)];
                 const profile = '{{asset('+${response.user.profile}+')}}';
                  
                 
@@ -267,6 +266,9 @@
                                     <button class="btn btn-sm minimize-btn" data-chat-id="${chatId}">
                                         <i class="fas fa-minus"></i>
                                     </button>
+                                    <a  href="" class="btn btn-sm minimize-btn" data-chat-id="${chatId}">
+                                        <i class="fas fa-expand"></i>
+                                    </a>
                                     <button class="btn btn-sm close-btn" data-chat-id="${chatId}">
                                         <i class="fas fa-times"></i>
                                     </button>
