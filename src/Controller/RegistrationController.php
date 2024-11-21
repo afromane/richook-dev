@@ -3,61 +3,26 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\RegistrationFormType;
+use App\Service\FileUploader;
+use App\Service\MailerService;
 use App\Security\EmailVerifier;
+use App\Form\RegistrationFormType;
+use Symfony\Component\Mime\Address;
 use App\Security\LoginAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
-use App\Service\FileUploader;
 
 class RegistrationController extends AbstractController
 {
     public function __construct(private EmailVerifier $emailVerifier) {}
-
-    #[Route('/email')]
-    public function maile(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
-    {
-        $user = new User();
-        /** @var string $plainPassword */
-        $plainPassword = "1111";
-
-        // encode the plain password
-        $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
-        $user->setFirstName('FN')
-            ->setLastName('LN')
-            ->setEmail('issamanel05@gmail.com')
-            ->setTypePerson('TP')
-            ->setCity('Yd')
-            ->setGender('G')
-            ->setProvince('Pro')
-            ->setProfile('Pr')
-            ->setCountry('C')
-            ->setActive(true)
-            ->setDevise('D');
-
-
-        // generate a signed url and email it to the user
-        $this->emailVerifier->sendEmailConfirmation(
-            'app_verify_email',
-            $user,
-            (new TemplatedEmail())
-                ->from(new Address('issamanel05@gmail.com', 'Manel Mail Bot'))
-                ->to((string) $user->getEmail())
-                ->subject('Please Confirm your Email')
-                ->htmlTemplate('registration/confirmation_email.html.twig')
-        );
-
-        return $this->redirectToRoute('app_register');
-    }
 
     #[Route('/register', name: 'app_register')]
     public function register(
@@ -65,7 +30,8 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         Security $security,
         EntityManagerInterface $entityManager,
-        FileUploader $fileUploader
+        FileUploader $fileUploader,
+        MailerService $mailerService
     ): Response {
         $user = new User();
         if ($request->isMethod('POST')) {
@@ -95,20 +61,13 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // generate a signed url and email it to the user
-            $this->emailVerifier->sendEmailConfirmation(
-                'app_verify_email',
-                $user,
-                (new TemplatedEmail())
-                    ->from(new Address('issamanel05@gmail.com', 'Manel Mail Bot'))
-                    ->to((string) $user->getEmail())
-                    ->subject('Please Confirm your Email')
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
-            );
+            $response = $mailerService->activateAccount($user);
+            return $this->render('registration/confirmation_email.html.twig', [
+            ]);
+            // return $this->redirectToRoute('app_login');
 
-            // do anything else you need here, like send an email
 
-            return $this->redirectToRoute('app_login');
+            // return $this->redirectToRoute('app_login');
             //return $security->login($user, LoginAuthenticator::class, 'main');
         }
 
@@ -136,5 +95,13 @@ class RegistrationController extends AbstractController
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->redirectToRoute('app_register');
+    }
+
+    #[Route('/activate-account/{id}', name: 'app_activate_account', methods: ['GET'])]
+    public function activateAccount(User $user,EntityManagerInterface $em): Response
+    {
+        $user->setVerified(true);
+        $em->flush();
+        return new Response(json_encode(true));
     }
 }
