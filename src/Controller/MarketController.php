@@ -38,6 +38,8 @@ class MarketController extends AbstractController
             if ($currentUser->getId() != $value->getUser()->getId()) {
                 $needs[] = $value;
             }
+            // $needs[] = $value;
+
         }
 
         return $this->render('market/needs.html.twig', [
@@ -74,7 +76,7 @@ class MarketController extends AbstractController
             $besoin->getUser() : $echange->getOwner();
 
 
-            $messages = $messageRepository->findBy( ['echange' => $echange->getId()],['id' => 'ASC'], 5  );
+            $messages = $messageRepository->findBy( ['echange' => $echange->getId()],['id' => 'ASC']  );
             $result = [];
             $lastMessage="";
             foreach ($messages as $value) {
@@ -112,7 +114,7 @@ class MarketController extends AbstractController
 
         // return new Response(json_encode($currentUser->getEmail(). '/'.$echange->getId() ));
 
-        $messages = $messageRepository->findBy( ['echange' => $echange->getId()],['id' => 'ASC'], 5  );
+        $messages = $messageRepository->findBy( ['echange' => $echange->getId()],['id' => 'ASC']  );
         $result = [];
         $lastMessage="";
         foreach ($messages as $value) {

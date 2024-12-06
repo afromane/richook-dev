@@ -158,52 +158,63 @@
 
 {% block javascripts %}
 
-    {# <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> #}
-    {# <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> #}
     <script>
         $(document).ready(function() {
-            let chatCount = 0;
-            const users = ['Alice', 'Bob', 'Charlie', 'David', 'Eve']; // Utilisateurs simulés
-            let typingTimers = {};
+            
+            // Fonction pour rafraîchir chaque fenêtre de chat ouverte toutes les 2 secondes
+            function autoRefreshChatWindows() {
+                // Identifier toutes les fenêtres de chat ouvertes
+                const openChatWindows = document.querySelectorAll('.chat-window');
 
-            // Fonction pour simuler une réponse
-            function simulateResponse(chatId, originalMessage) {
-                const chatBody = $(`#${chatId}`).find('.chat-body');
-                const typingIndicator = $(`#${chatId}`).find('.typing-indicator');
-                
-                // Afficher l'indicateur de frappe
-                typingIndicator.show();
-                
-                // Simuler un délai de réponse aléatoire
-                setTimeout(() => {
-                    typingIndicator.hide();
-                    
-                    // Générer une réponse basée sur le message original
-                    let response;
-                    if (originalMessage.toLowerCase().includes('bonjour')) {
-                        response = "Bonjour ! Comment puis-je vous aider ?";
-                    } else if (originalMessage.toLowerCase().includes('comment')) {
-                        response = "Je vais bien, merci de demander !";
-                    } else {
-                        const responses = [
-                            "Intéressant, dites-m'en plus !",
-                            "Je comprends ce que vous voulez dire.",
-                            "C'est une bonne observation.",
-                            "Je suis d'accord avec vous."
-                        ];
-                        response = responses[Math.floor(Math.random() * responses.length)];
-                    }
-                    
-                    // Ajouter la réponse au chat
-                    addMessage(chatId, response, 'received');
-                    
-                    // Faire défiler jusqu'en bas
-                    chatBody.scrollTop(chatBody[0].scrollHeight);
-                }, Math.random() * 2000 + 1000); // Délai aléatoire entre 1 et 3 secondes
+                // Parcourir chaque fenêtre et la rafraîchir
+                openChatWindows.forEach(chatWindow => {
+                    const chatId = chatWindow.id; // Récupérer l'ID de la fenêtre de chat
+                    const echangeId = chatWindow.querySelector('.exchangeId').value; // Récupérer l'ID de l'échange
+
+                    // Vérifier si une mise à jour est réellement nécessaire
+                    const lastMessageId = chatWindow.dataset.lastMessageId || null; // ID du dernier message connu
+
+                    // Appeler l'API pour rafraîchir les messages uniquement si nécessaire
+                    $.ajax({
+                        url: '{{ path("app_market_needs_message_show") }}',
+                        type: 'POST',
+                        data: { id: echangeId, lastMessageId: lastMessageId },
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.messages && response.messages.length > 0) {
+                                const chatBody = chatWindow.querySelector('.chat-body');
+
+                                // Ajouter uniquement les nouveaux messages
+                                response.messages.forEach(message => {
+                                    const messageHtml = `
+                                        <div class="message ${message.sender === message.currentUser ? 'message-sent' : 'message-received'}">
+                                            ${message.contenu}
+                                        </div>`;
+                                    chatBody.insertAdjacentHTML('beforeend', messageHtml);
+                                });
+
+                                // Mettre à jour l'ID du dernier message
+                                const lastMessage = response.messages[response.messages.length - 1];
+                                chatWindow.dataset.lastMessageId = lastMessage.id;
+
+                                // Faire défiler la fenêtre vers le bas
+                                chatBody.scrollTop = chatBody.scrollHeight;
+                            }
+                        },
+                        error: function () {
+                            console.error(`Erreur lors du rafraîchissement de la fenêtre de chat avec l'ID : ${chatId}`);
+                        }
+                    });
+                });
             }
+
+            // Lancer le rafraîchissement automatique toutes les 2 secondes
+            setInterval(autoRefreshChatWindows, 5000);
+
 
             // Fonction pour ajouter un message
             function addMessage(chatId, messages, type) {
+
                 const chatBody = $(`#${chatId}`).find('.chat-body');
                 const echangeId = $(`#${chatId} .exchangeId `).val();
 
@@ -221,7 +232,8 @@
                                 data: { id: echangeId },
                                 dataType: 'json',
                                 success: function (response1) {
-                                    displayMessages(response1, chatId);
+                                    // Rafraîchir les messages après envoi
+                                     refreshMessages(chatId, echangeId);
                                 },
                                 error: function (xhr, status, error) {
                                     console.error('Erreur lors du rafraîchissement:', error);
@@ -236,23 +248,41 @@
                     alert('Veuillez entrer un message avant de l\'envoyer.');
                 }
                 
-                // Ajouter les messages
-               /* messages.forEach(message => {
-                    
-                       chatBody.append(`
-                                <div class="message ${message.sender === message.currentUser  ? 'message-sent' : 'message-received'}">
-                                        ${message.contenu}
-                                    </div>
-                            `);
-                });*/
+               
                 
                 chatBody.scrollTop(chatBody[0].scrollHeight);
+            }
+            // Fonction pour rafraîchir les messages
+            function refreshMessages(chatId, echangeId) {
+                $.ajax({
+                    url: '{{ path("app_market_needs_message_show") }}',
+                    type: 'POST',
+                    data: { id: echangeId },
+                    dataType: 'json',
+                    success: function (response) {
+                        const chatBody = $(`#${chatId}`).find('.chat-body');
+                        chatBody.empty(); // Vider les anciens messages
+
+                        // Ajouter les nouveaux messages
+                        response.messages.forEach(message => {
+                            const messageHtml = `
+                                <div class="message ${message.sender === message.currentUser ? 'message-sent' : 'message-received'}">
+                                    ${message.contenu}
+                                </div>`;
+                            chatBody.append(messageHtml);
+                        });
+
+                        // Faire défiler la fenêtre vers le bas
+                        chatBody.scrollTop(chatBody[0].scrollHeight);
+                    },
+                    error: function () {
+                        console.error('Erreur lors du rafraîchissement des messages.');
+                    }
+                });
             }
             // Fonction pour afficher les messages
             function displayMessages(response,chatId){
                 const profile = '{{asset('+${response.user.profile}+')}}';
-                 
-                
                 const chatHtml = `
                     <div class="chat-window" id="${chatId}">
                         <div class="chat-header border-bottom">
@@ -317,14 +347,20 @@
                         </div>`;
                     chatBody.append(messageHtml);
                 });
-                repositionChats();
+               repositionChats(); // Repositionne après l'ajout
             }
             // Fonction pour créer une nouvelle fenêtre de chat
             function createNewChat() {
-                chatCount++;
-                const chatId = `chat-${chatCount}`;
                 const needId = $(this).attr('id').trim()
-                $.ajax({
+                const chatId = `chat-${needId}`;
+
+                // Vérifier si le chat avec cet ID existe déjà
+                if ($("#" + chatId).length > 0) {
+                    return;
+                    }
+                else{
+
+                    $.ajax({
                     url: '{{path("app_market_needs_start_exchange")}}',
                     type: 'POST',
                     data: { needId: needId },
@@ -337,69 +373,25 @@
                         console.error('Erreur:', error);
                     }
                 });
-                /* const chatHtml = `
-                    <div class="chat-window" id="${chatId}">
-                        <div class="chat-header border-bottom">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <div class="user-avatar me-2"></div>
-                                    <span class="fw-bold">${userName}</span>
-                                </div>
-                                <div>
-                                    <button class="btn btn-sm minimize-btn" data-chat-id="${chatId}">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <button class="btn btn-sm close-btn" data-chat-id="${chatId}">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chat-body">
-                            <div class="text-center text-muted small mb-3">
-                                Début de votre conversation avec ${userName}
-                            </div>
-                            <div class="typing-indicator text-muted small">
-                                <span>${userName} est en train d'écrire</span>
-                                <span class="typing-dots"></span>
-                            </div>
-                        </div>
-                        <div class="chat-input">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1 me-2">
-                                    <div class="input-group chat-input-field">
-                                        <input type="text" class="form-control border-0 bg-transparent" 
-                                            placeholder="Aa" data-chat-id="${chatId}">
-                                        <span class="input-group-text border-0 bg-transparent">
-                                            <i class="far fa-smile"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <button class="btn btn-link text-primary p-0 send-like" data-chat-id="${chatId}">
-                                        <i class="fas fa-thumbs-up"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                 `;
+                }
+                //repositionChats()
                 
-                    $('#chatContainer').append(chatHtml);
-                */
-                repositionChats();
+                //repositionChats();
             }
             
             // Fonction pour repositionner les chats
             function repositionChats() {
-                if ($(window).width() > 768) {
+                const chatWidth = 320; // Largeur fixe d'une fenêtre de chat
+                const spacing = 20; // Espacement entre les fenêtres de chat
+
+                if ($(window).width() > 768) { // Sur écrans larges
                     $('.chat-window').each(function(index) {
-                        $(this).css('right', (320 * index + 20) + 'px');
+                        $(this).css('right', (chatWidth * index + spacing) + 'px');
                     });
-                } else {
+                } else { // Sur écrans étroits (mobile)
                     $('.chat-window').css('right', '');
                 }
-            }
+}
 
             // Gestionnaire pour le bouton nouvelle conversation
             $('.newChatBtn').click(createNewChat);

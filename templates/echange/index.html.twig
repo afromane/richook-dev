@@ -536,6 +536,29 @@
                     alert('Veuillez entrer un message avant de l\'envoyer.');
                 }
             });
+
+            // Fonction pour rafraîchir les messages
+            function refreshMessages() {
+                const echangeId = $echangeId.val();
+                if (echangeId) {
+
+                    $.ajax({
+                        url: '{{path("app_echange_message_show")}}',
+                        type: 'POST',
+                        data: { echangeId: echangeId },
+                        dataType: 'json',
+                        success: function (response) {
+                            displayMessages(response, echangeId);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Erreur lors du rafraîchissement:', error);
+                        }
+                    });
+                }
+            }
+
+            // Rafraîchir automatiquement toutes les 5 secondes
+            setInterval(refreshMessages, 5000);
         });
 
     </script>
@@ -604,7 +627,7 @@
 
                                               </p>
                                           </div>
-                                          <span class="notification-badge">2</span> 
+                                          {# <span class="notification-badge">2</span>  #}
                                       </div>
                                   </div>
                                 {% else %}
@@ -632,7 +655,7 @@
 
                                               </p>
                                           </div>
-                                          <span class="notification-badge">2</span> 
+                                          {# <span class="notification-badge">2</span>  #}
                                       </div>
                                   </div>
                                  {% else %}
