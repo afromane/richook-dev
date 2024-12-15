@@ -198,6 +198,7 @@ class JsonController extends AbstractController
 
     }
 
+
     
     #[Route('/json/message/send',  methods: ['GET', 'POST'])]
     public function send_message(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, EchangeRepository $echangeRepository): Response
@@ -233,5 +234,76 @@ class JsonController extends AbstractController
         return new Response(
             json_encode('successfully')
         );
+    }
+
+    #[Route('/json/exchange/need', methods: ['GET'])]
+    public function needExchange(EchangeRepository $echangeRepository, UserRepository $userRepository): Response
+    {
+        //recupere toutes les echanges de l'utilisateur courant
+        $echanges = $echangeRepository->findAll();
+        // dd( $echanges);
+        // $currentUser =  $userRepository->findOneBy(array('email' => $this->getUser()->getUserIdentifier()));
+        $exchangeNeed = [];
+
+        foreach ($echanges as $value) {
+            // retrieve all potential exchange
+            if ($value->getBesoin()  && $value->getPotentiel()  == null) {
+                // if ($value->getOwner()->getId() == $currentUser->getId() || $value->getPotentiel()->getUser()->getId() == $currentUser->getId())
+                    $exchangeNeed[] = array(
+                        'id'=>$value->getId(),
+                        'createdAt'=>$value->getCreatedAt(),
+                        'besoin'=>array(
+                            'id'=>$value->getBesoin()->getId(),
+                            'label'=>$value->getBesoin()->getLabel(),
+                            'description'=>$value->getBesoin()->getDescription(),
+                            'img'=>$value->getBesoin()->getImg(),
+                        ),
+                        'owner'=>array(
+                            'id'=>$value->getOwner()->getId(),
+                            'firstName'=>$value->getOwner()->getFirstName(),
+                            'lastName'=>$value->getOwner()->getLastName(),
+                            )
+
+                    );
+            } 
+        }
+
+        return new Response(json_encode( $exchangeNeed));
+        
+    }
+    #[Route('/json/exchange/potential', methods: ['GET'])]
+    public function potentialExchange(EchangeRepository $echangeRepository, UserRepository $userRepository): Response
+    {
+        //recupere toutes les echanges de l'utilisateur courant
+        $echanges = $echangeRepository->findAll();
+        // dd( $echanges);
+        // $currentUser =  $userRepository->findOneBy(array('email' => $this->getUser()->getUserIdentifier()));
+        $items = [];
+
+        foreach ($echanges as $value) {
+            // retrieve all potential exchange
+            if ($value->getBesoin() == null  && $value->getPotentiel() ) {
+                // if ($value->getOwner()->getId() == $currentUser->getId() || $value->getPotentiel()->getUser()->getId() == $currentUser->getId())
+                    $items[] = array(
+                        'id'=>$value->getId(),
+                        'createdAt'=>$value->getCreatedAt(),
+                        'potential'=>array(
+                            'id'=>$value->getBesoin()->getId(),
+                            'label'=>$value->getBesoin()->getName(),
+                            'description'=>$value->getBesoin()->getDescription(),
+                            'img'=>$value->getBesoin()->getImg(),
+                        ),
+                        'owner'=>array(
+                            'id'=>$value->getOwner()->getId(),
+                            'firstName'=>$value->getOwner()->getFirstName(),
+                            'lastName'=>$value->getOwner()->getLastName(),
+                            )
+
+                    );
+            } 
+        }
+
+        return new Response(json_encode( $items));
+        
     }
 }
